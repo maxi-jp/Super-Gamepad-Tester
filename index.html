@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Gamepad Tester</title>
+    <meta name="description" content="Connect any controller and visualize every button, stick, and trigger in real time. Supports Xbox, DualSense, Nintendo Switch Pro Controller, and more.">
+    <meta name="keywords" content="Gamepad, tester, playstation dualsense, nintendo switch pro controller, xbox, generic HID">
+    <meta name="author" content="Maximiliano Miranda">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>Super Gamepad Tester</h1>
+        <p class="tagline">Connect a controller &amp; see every input in real time</p>
+    </header>
+
+    <div class="canvas-wrap">
+        <canvas id="myCanvas" width="640" height="480"></canvas>
+    </div>
+
+    <p class="hint">Press any button to start — background adapts to your controller</p>
+
+    <div class="badges">
+        <span class="badge badge-xbox">Xbox</span>
+        <span class="badge badge-ps">PlayStation DualSense</span>
+        <span class="badge badge-switch">Nintendo Switch Pro</span>
+        <span class="badge badge-generic">Generic HID</span>
+    </div>
+
+    <footer>
+        Built with <a href="https://github.com/maxi-jp/HTML5_Engine" target="_blank" rel="noopener">HTML5_Engine</a> by <a href="https://github.com/maxi-jp" target="_blank" rel="noopener">maxi-jp</a>
+    </footer>
+
+    <script src="engine.js"></script>
+    <script src="gamepad_tester.js"></script>
+
+</body>
+</html>
