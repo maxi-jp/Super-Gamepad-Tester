@@ -88,7 +88,11 @@ class GamepadTester extends Game {
         this.gamepadStickCircles = [];
         this.gamepadButtons = [];
 
-        this.infoTextLabel = new TextLabel("No gamepad detected.", new Vector2(20, 20), "Comic Sans MS 20px", Color.black);
+        this.rumbleActive = false;
+
+        this.infoTextLabel = null;
+        this.rumbleCheckboxTextLabel = null;
+        this.rumbleCheckBoxRectangle = null;
 
         this.bgGradient = null;
         this.lastGamepadId = "";
@@ -138,8 +142,24 @@ class GamepadTester extends Game {
 
         this.infoTextLabel = new TextLabel("No gamepad detected.", new Vector2(10, 10), "16px Comic Sans MS", Color.black, "left", "top");
 
+        // rumble checkbox rectangle & label
+        this.rumbleCheckboxTextLabel = new TextLabel("<- click to enable rumble", new Vector2(60, this.screenHeight - 30), "Comic Sans MS 20px", Color.black, "left");
+
+        this.rumbleCheckBoxRectangle = new RectangleGO(new Vector2(40, this.screenHeight - 40), 30, 30, Color.red);
+        const rectCheckboxCollider = new RectangleCollider(Vector2.Zero(), this.rumbleCheckBoxRectangle.rectangle.width, this.rumbleCheckBoxRectangle.rectangle.height, this.rumbleCheckBoxRectangle);
+        this.rumbleCheckBoxRectangle.collider = rectCheckboxCollider;
+        this.AddCollider(rectCheckboxCollider);
+        rectCheckboxCollider.OnClick = () => {
+            this.rumbleActive = !this.rumbleActive;
+            this.rumbleCheckboxTextLabel.text = this.rumbleActive ? "Rumble enabled! use L/R triggers to rumble (left = strong, right = weak)." : "<- click to enable rumble";
+            this.rumbleCheckBoxRectangle.color = this.rumbleActive ? Color.lime : Color.red;
+        }
+        this.gameObjects.push(this.rumbleCheckBoxRectangle);
+
+        // background gradient
         this.bgGradient = new LinearGradient(this.renderer, new Vector2(this.screenWidth, this.screenHeight).Normalize(), [[0, Color.white], [1, Color.grey]]);
 
+        // sticks history
         this.gamepadStickCircles[0].historic = [{x: 0, y: 0}];
         this.gamepadStickCircles[1].historic = [{x: 0, y: 0}];
     }
@@ -174,6 +194,15 @@ class GamepadTester extends Game {
         this.gamepadTriggers.forEach(trigger => {
             trigger.value = Input.GetGamepadTriggerValue(0, trigger.id);
         });
+
+        // rumble: LT drives the strong (low-freq) motor, RT drives the weak (high-freq) motor
+        if (this.rumbleActive) {
+            const lt = this.gamepadTriggers[0].value;
+            const rt = this.gamepadTriggers[1].value;
+            if (lt > 0.05 || rt > 0.05) {
+                Input.RumbleGamepad(0, lt, rt, 100);
+            }
+        }
 
         this.infoTextLabel.text = Input.gamepads.length === 0 ? "No gamepad detected." : `Gamepad detected: ${Input.gamepads[0].gamepad.id}`;
         
@@ -212,9 +241,9 @@ class GamepadTester extends Game {
     }
 
     Draw() {
-        super.Draw();
-
         this.renderer.DrawGradientRectangle(0, 0, this.screenWidth, this.screenHeight, this.bgGradient);
+        
+        super.Draw();
 
         // gamepad buttons
         this.gamepadButtonCircles.forEach(buttonCircle => {
@@ -247,6 +276,8 @@ class GamepadTester extends Game {
         }, this);
 
         this.infoTextLabel.Draw(this.renderer);
+
+        this.rumbleCheckboxTextLabel.Draw(this.renderer);
     }
 }
 
