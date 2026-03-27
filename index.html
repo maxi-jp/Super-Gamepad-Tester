@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Gamepad Tester</title>
-    <meta name="description" content="Connect any controller and visualize every button, stick, and trigger in real time. Supports Xbox, DualSense, Nintendo Switch Pro Controller, and more.">
+    <title>Super Gamepad Tester — HTML UI</title>
+    <meta name="description" content="Connect any controller and visualize every button, stick, and trigger in real time. HTML+CSS overlay on a live canvas background.">
     <meta name="keywords" content="Gamepad, tester, playstation dualsense, nintendo switch pro controller, xbox, generic HID">
     <meta name="author" content="Maximiliano Miranda">
     <link rel="icon" type="image/x-icon" href="favicon.png">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="gamepad_ui.css">
 </head>
 <body>
 
@@ -17,11 +18,119 @@
         <p class="tagline">Connect a controller &amp; see every input in real time</p>
     </header>
 
-    <div class="canvas-wrap">
+    <!--
+        #container: relative-positioned wrapper.
+          • <canvas>        — pure animation layer (brand gradient + stick trails + press rings)
+          • #gamepadPanel   — HTML/CSS overlay managed by GamepadUI extends HTMLMenu
+    -->
+    <div id="container" class="canvas-wrap">
         <canvas id="myCanvas" width="640" height="480"></canvas>
-    </div>
 
-    <p class="hint">Press any button to start — background adapts to your controller</p>
+        <div id="gamepadPanel">
+
+            <!-- ── Status bar ───────────────────────────────── -->
+            <div id="statusBar">
+                <span class="dot" id="statusDot"></span>
+                <span id="statusText">No gamepad detected</span>
+            </div>
+
+            <!-- ── Left trigger ─────────────────────────────── -->
+            <div class="trigger-zone" id="ltZone">
+                <span class="trigger-label">LT</span>
+                <div class="trigger-bar-track">
+                    <div class="trigger-bar-fill" id="ltBar"></div>
+                </div>
+                <span class="trigger-value" id="ltValue">0.000</span>
+            </div>
+
+            <!-- ── Right trigger ────────────────────────────── -->
+            <div class="trigger-zone" id="rtZone">
+                <span class="trigger-label">RT</span>
+                <div class="trigger-bar-track">
+                    <div class="trigger-bar-fill" id="rtBar"></div>
+                </div>
+                <span class="trigger-value" id="rtValue">0.000</span>
+            </div>
+
+            <!-- ── Shoulder buttons ──────────────────────────── -->
+            <button class="shoulder-btn" id="btnLB">LB<span class="up-count"></span><span class="press-count"></span></button>
+            <button class="shoulder-btn" id="btnRB">RB<span class="up-count"></span><span class="press-count"></span></button>
+
+            <!-- ── D-pad (3×3 grid, cross) ───────────────────── -->
+            <div id="dpad">
+                <div></div>
+                <button class="dpad-btn" id="btnDpadUp">↑<span class="up-count"></span><span class="press-count"></span></button>
+                <div></div>
+                <button class="dpad-btn" id="btnDpadLeft">←<span class="up-count"></span><span class="press-count"></span></button>
+                <div class="dpad-center">+</div>
+                <button class="dpad-btn" id="btnDpadRight">→<span class="up-count"></span><span class="press-count"></span></button>
+                <div></div>
+                <button class="dpad-btn" id="btnDpadDown">↓<span class="up-count"></span><span class="press-count"></span></button>
+                <div></div>
+            </div>
+
+            <!-- ── Center buttons (BACK / HOME / START) ─────── -->
+            <div id="centerBtns">
+                <button class="center-btn" id="btnBack">⋯<span class="up-count"></span><span class="press-count"></span></button>
+                <button class="center-btn home-btn" id="btnHome">⏺<span class="up-count"></span><span class="press-count"></span></button>
+                <button class="center-btn" id="btnStart">▶<span class="up-count"></span><span class="press-count"></span></button>
+            </div>
+
+            <!-- ── Face buttons (3×3 grid, diamond) ─────────── -->
+            <div id="faceButtons">
+                <div></div>
+                <button class="face-btn" id="btnFaceUp">Y<span class="up-count"></span><span class="press-count"></span></button>
+                <div></div>
+                <button class="face-btn" id="btnFaceLeft">X<span class="up-count"></span><span class="press-count"></span></button>
+                <div></div>
+                <button class="face-btn" id="btnFaceRight">B<span class="up-count"></span><span class="press-count"></span></button>
+                <div></div>
+                <button class="face-btn" id="btnFaceDown">A<span class="up-count"></span><span class="press-count"></span></button>
+                <div></div>
+            </div>
+
+            <!-- ── Left stick ────────────────────────────────── -->
+            <!--
+                Ring centre at CSS (180+40, 290+40) = (220, 330) px
+                matches LS_CX / LS_CY constants in gamepad_tester_html.js
+            -->
+            <div class="stick-zone" id="lsZone">
+                <div class="stick-ring" id="btnLSPress">
+                    <div class="stick-thumb" id="lsThumb"></div>
+                    <span class="stick-label">LS</span>
+                </div>
+                <div class="stick-readout">
+                    <span class="axis-row">x <span id="lsX">0.000</span></span>
+                    <span class="axis-row">y <span id="lsY">0.000</span></span>
+                </div>
+            </div>
+
+            <!-- ── Right stick ───────────────────────────────── -->
+            <!--
+                Ring centre at CSS (380+40, 290+40) = (420, 330) px
+                matches RS_CX / RS_CY constants in gamepad_tester_html.js
+            -->
+            <div class="stick-zone" id="rsZone">
+                <div class="stick-ring" id="btnRSPress">
+                    <div class="stick-thumb" id="rsThumb"></div>
+                    <span class="stick-label">RS</span>
+                </div>
+                <div class="stick-readout">
+                    <span class="axis-row">x <span id="rsX">0.000</span></span>
+                    <span class="axis-row">y <span id="rsY">0.000</span></span>
+                </div>
+            </div>
+
+            <!-- ── Rumble toggle ─────────────────────────────── -->
+            <div id="rumbleSection">
+                <button id="rumbleBtn">🔇 Rumble OFF</button>
+                <p class="rumble-hint">LT strong motor · RT weak motor</p>
+            </div>
+
+        </div><!-- /#gamepadPanel -->
+    </div><!-- /#container -->
+
+    <p class="hint">Press any button — background adapts to your controller</p>
 
     <div class="badges">
         <span class="badge badge-xbox">Xbox</span>
@@ -31,7 +140,7 @@
     </div>
 
     <p class="cross-promo">
-        Check a full rumble tester in the <a href="https://maxi-jp.github.io/Super-GamepadRumble-Tester/" target="_blank" rel="noopener">Super GamepadRumble Tester</a>!
+        Check a full rumble tester in the <a href="https://maxi-jp.github.io/Super-GamepadRumble-Tester/" target="_blank" rel="noopener">Super Gamepad Rumble Tester</a>!
     </p>
 
     <footer>
@@ -39,7 +148,7 @@
     </footer>
 
     <script src="engine.js"></script>
-    <script src="gamepad_tester.js"></script>
+    <script src="gamepad_tester_html.js"></script>
 
 </body>
 </html>

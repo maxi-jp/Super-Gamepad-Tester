@@ -1,0 +1,423 @@
+/* ═══════════════════════════════════════════════════════════════
+   gamepad_ui.css — HTML overlay for the Gamepad Tester HTML version
+   All positions are in px within a 640 × 480 panel (set by HTMLMenu).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Container: move box-shadow here so overflow:hidden doesn't clip it ── */
+#container {
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow:
+        0 0 0 1px rgba(99, 102, 241, 0.2),
+        0 0 50px rgba(99, 102, 241, 0.18),
+        0 24px 64px rgba(0, 0, 0, 0.6);
+}
+
+/* Suppress the shadow that was on the canvas element in styles.css */
+#container canvas {
+    box-shadow: none;
+}
+
+/* ── Panel root ──────────────────────────────────────────────── */
+#gamepadPanel {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: transparent;
+    pointer-events: none;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #e2e8f0;
+    line-height: normal;  /* reset: .canvas-wrap sets line-height:0 on #container */
+    user-select: none;
+}
+
+/* Only the rumble toggle button is interactive */
+#rumbleBtn {
+    pointer-events: auto;
+}
+
+/* ── Status bar ──────────────────────────────────────────────── */
+#statusBar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    background: linear-gradient(to right, rgba(10, 15, 30, 0.85) 0%, rgba(10, 15, 30, 0.25) 100%);
+    backdrop-filter: blur(4px);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+    font-size: 0.72rem;
+    color: #94a3b8;
+    letter-spacing: 0.04em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Brand-color dot */
+.dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: #f87171;
+    box-shadow: 0 0 6px #f87171;
+    transition: background 0.4s, box-shadow 0.4s;
+}
+.dot.dot-xbox        { background: #4ade80; box-shadow: 0 0 7px #4ade80; }
+.dot.dot-playstation { background: #60a5fa; box-shadow: 0 0 7px #60a5fa; }
+.dot.dot-nintendo    { background: #fca5a5; box-shadow: 0 0 7px #fca5a5; }
+.dot.dot-generic     { background: #818cf8; box-shadow: 0 0 7px #818cf8; }
+
+/* ── Trigger zones (left / right vertical fill bars) ─────────── */
+.trigger-zone {
+    position: absolute;
+    top: 46px;
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+#ltZone { left:  14px; }
+#rtZone { right: 14px; }
+
+.trigger-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.trigger-bar-track {
+    width: 26px;
+    height: 68px;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Full-track background tint — shown as ::before when any pressure is detected */
+.trigger-bar-track::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(99, 241, 130, 0.12);
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.1s;
+    z-index: 0;
+}
+.trigger-bar-track.active::before {
+    opacity: 1;
+}
+
+/* Fill grows downward: 0% = not pressed, 100% = fully pressed */
+.trigger-bar-fill {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 0%;
+    background: linear-gradient(to bottom, #818cf8, #6366f1);
+    border-radius: 6px 6px 0 0;
+    transition: height 0.04s linear;
+    z-index: 1;  /* sits in front of the full-track ::before overlay */
+}
+
+.trigger-value {
+    font-size: 0.6rem;
+    font-variant-numeric: tabular-nums;
+    color: #94a3b8;
+}
+
+/* ── Shoulder buttons (LB / RB) ───────────────────────────────── */
+.shoulder-btn {
+    position: absolute;
+    top: 162px;
+    width: 88px;
+    height: 26px;
+    background: rgba(30, 41, 59, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 6px;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    --btn-color: #818cf8;
+    transition: background 0.06s, box-shadow 0.06s, color 0.06s;
+}
+#btnLB { left:  14px; }
+#btnRB { right: 14px; }
+
+/* ── D-pad (3 × 3 grid, cross shape) ─────────────────────────── */
+#dpad {
+    position: absolute;
+    top: 175px;
+    left: 126px;
+    display: grid;
+    grid-template-columns: repeat(3, 34px);
+    grid-template-rows: repeat(3, 34px);
+    gap: 3px;
+}
+
+.dpad-btn {
+    background: rgba(30, 41, 59, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 4px;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    --btn-color: #818cf8;
+    transition: background 0.05s, box-shadow 0.05s, color 0.05s;
+}
+
+.dpad-center {
+    background: rgba(20, 30, 50, 0.25);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(100, 116, 139, 0.25);
+    font-size: 1rem;
+    pointer-events: none;
+    padding-bottom: 2px;
+}
+
+/* ── Center buttons (BACK / HOME / START) ─────────────────────── */
+#centerBtns {
+    position: absolute;
+    top: 224px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.center-btn {
+    background: rgba(30, 41, 59, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    color: #475569;
+    font-size: 0.72rem;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    --btn-color: #818cf8;
+    transition: background 0.05s, box-shadow 0.05s, color 0.05s;
+}
+
+.home-btn {
+    width: 32px; height: 32px;
+    --btn-color: #fbbf24;
+    color: #64748b;
+    font-size: 0.9rem;
+    padding-bottom: 2px;
+}
+
+/* ── Face buttons (3 × 3 grid, diamond shape) ────────────────── */
+#faceButtons {
+    position: absolute;
+    top: 175px;
+    left: 406px;
+    display: grid;
+    grid-template-columns: repeat(3, 36px);
+    grid-template-rows: repeat(3, 36px);
+    gap: 0px;
+}
+
+.face-btn {
+    background: rgba(30, 41, 59, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 50%;
+    color: #64748b;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: background 0.05s, box-shadow 0.05s, color 0.05s;
+    --btn-color: #818cf8;
+}
+
+/* Per-button accent colors — visible even when not pressed */
+#btnFaceDown  { --btn-color: #4ade80; color: #4ade80; }   /* A */
+#btnFaceRight { --btn-color: #f87171; color: #f87171; }   /* B */
+#btnFaceLeft  { --btn-color: #60a5fa; color: #60a5fa; }   /* X */
+#btnFaceUp    { --btn-color: #fbbf24; color: #fbbf24; }   /* Y */
+#btnHome      { --btn-color: #fbbf24; }
+
+/* Pressed state — shared by all button types */
+.dpad-btn.pressed,
+.face-btn.pressed,
+.shoulder-btn.pressed,
+.center-btn.pressed {
+    background: var(--btn-color);
+    box-shadow: 0 0 12px var(--btn-color);
+    color: #0d0f14;
+}
+
+/* Override face-button accent colors when pressed (ID specificity wins otherwise) */
+#btnFaceDown.pressed,
+#btnFaceRight.pressed,
+#btnFaceLeft.pressed,
+#btnFaceUp.pressed {
+    color: #0d0f14;
+}
+
+/* ── Press count badges ────────────────────────────────────────── */
+.press-count,
+.up-count {
+    position: absolute;
+    top: 2px;
+    font-size: 8px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+    text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.9),
+        0 0   2px rgba(0, 0, 0, 0.8);
+}
+.press-count { right: 3px; }  /* ↓ down count */
+.up-count    { left:  3px; }  /* ↑ up count   */
+
+.press-count::before { content: '↓'; }
+.up-count::before    { content: '↑'; }
+
+/* ── Analog stick zones ────────────────────────────────────────── */
+.stick-zone {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+/* left:180 → ring centre x = 180+40 = 220  (matches LS_CX in JS) */
+#lsZone { top: 290px; left: 180px; }
+/* left:380 → ring centre x = 380+40 = 420  (matches RS_CX in JS) */
+#rsZone { top: 290px; left: 380px; }
+
+/* The ring is transparent so the orange canvas trail shows through */
+.stick-ring {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(148, 163, 184, 0.5);
+    background: rgba(10, 15, 30, 0.12);
+    position: relative;
+    cursor: default;
+    transition: border-color 0.1s, box-shadow 0.1s;
+    --btn-color: #818cf8;
+}
+
+.stick-ring.pressed {
+    border-color: var(--btn-color);
+    box-shadow: 0 0 14px var(--btn-color);
+}
+
+/* Movable thumb — JS applies CSS transform based on stick axes */
+.stick-thumb {
+    position: absolute;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(226, 232, 240, 0.72);
+    border: 2px solid rgba(148, 163, 184, 0.45);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: transform 0.04s linear;
+}
+
+/* Small label at the bottom of the ring (LS / RS) */
+.stick-label {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.52rem;
+    font-weight: 700;
+    color: rgba(148, 163, 184, 0.35);
+    pointer-events: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* Axis value readout below each ring */
+.stick-readout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+.axis-row {
+    font-size: 0.62rem;
+    font-variant-numeric: tabular-nums;
+    color: #94a3b8;
+    letter-spacing: 0.01em;
+}
+
+/* ── Rumble toggle ─────────────────────────────────────────────── */
+#rumbleSection {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+#rumbleBtn {
+    padding: 0.28rem 1.1rem;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(129, 140, 248, 0.25);
+    border-radius: 999px;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+}
+
+#rumbleBtn:hover {
+    background: rgba(49, 60, 80, 0.88);
+    color: #94a3b8;
+}
+
+#rumbleBtn.active {
+    background: rgba(99, 102, 241, 0.22);
+    border-color: rgba(129, 140, 248, 0.55);
+    color: #a5b4fc;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.28);
+}
+
+.rumble-hint {
+    font-size: 0.58rem;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding: 0.6em 0 1em 0;
+}
